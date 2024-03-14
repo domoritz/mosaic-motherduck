@@ -1,0 +1,19 @@
+{
+  "name": "mosaic-motherduck",
+  "version": "0.0.1",
+  "description": "A demo of Mosaic + Motherduck",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "author": "Dominik Moritz",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "@motherduck/wasm-client": "^0.4.0",
+    "@uwdata/vgplot": "^0.7.0"
+  },
+  "devDependencies": {
+    "vite": "^5.1.6"
+  }
+}
