@@ -38,7 +38,7 @@ const app = document.querySelector("#app");
 
 vg.coordinator().databaseConnector(connector);
 
-const table = "gaia-import.main.gaia_sample_1_percent_projected"
+const table = "s.main.gaia_sample_1_percent_projected"
 
 const size = await connector.query({ sql: `SELECT COUNT(*) as cnt FROM ${table.split(".").map(s => `"${s}"`).join(".")}`, type: "arrow" })
 
