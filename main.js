@@ -38,50 +38,93 @@ const app = document.querySelector("#app");
 
 vg.coordinator().databaseConnector(connector);
 
+const table = "gaia-import.main.gaia_sample_1_percent_projected"
+
+const size = await connector.query({ sql: `SELECT COUNT(*) as cnt FROM ${table.split(".").map(s => `"${s}"`).join(".")}`, type: "arrow" })
+
+const count = document.createElement("div")
+count.innerHTML = `Number of rows: ${new Intl.NumberFormat('en-US', { maximumSignificantDigits: 3 }).format(size.get(0).cnt)}`
+
+app.appendChild(count);
+
 const $brush = vg.Selection.crossfilter();
+const $bandwidth = vg.Param.value(0);
+const $pixelSize = vg.Param.value(2);
+const $scaleType = vg.Param.value("sqrt");
 
-const table = "ugly-duck.main.flights10m";
-
-const chart = vg.vconcat(
-  vg.plot(
-    vg.rectY(vg.from(table, { filterBy: $brush }), {
-      x: vg.bin("delay"),
-      y: vg.count(),
-      fill: "steelblue",
-      inset: 0.5,
-    }),
-    vg.intervalX({ as: $brush }),
-    vg.xDomain(vg.Fixed),
-    vg.yTickFormat("s"),
-    vg.width(600),
-    vg.height(200)
+const chart = vg.hconcat(
+  vg.vconcat(
+    vg.plot(
+      vg.raster(vg.from(table, { filterBy: $brush }), {
+        x: "u",
+        y: "v",
+        fill: "density",
+        bandwidth: $bandwidth,
+        pixelSize: $pixelSize,
+      }),
+      vg.intervalXY({ pixelSize: 2, as: $brush }),
+      vg.xyDomain(vg.Fixed),
+      vg.colorScale($scaleType),
+      vg.colorScheme("viridis"),
+      vg.width(880),
+      vg.height(500),
+      vg.marginLeft(25),
+      vg.marginTop(20),
+      vg.marginRight(1)
+    ),
+    vg.hconcat(
+      vg.plot(
+        vg.rectY(vg.from(table, { filterBy: $brush }), {
+          x: vg.bin("phot_g_mean_mag"),
+          y: vg.count(),
+          fill: "steelblue",
+          inset: 0.5,
+        }),
+        vg.intervalX({ as: $brush }),
+        vg.xDomain(vg.Fixed),
+        vg.yScale($scaleType),
+        vg.yGrid(true),
+        vg.width(440),
+        vg.height(240),
+        vg.marginLeft(65)
+      ),
+      vg.plot(
+        vg.rectY(vg.from(table, { filterBy: $brush }), {
+          x: vg.bin("parallax"),
+          y: vg.count(),
+          fill: "steelblue",
+          inset: 0.5,
+        }),
+        vg.intervalX({ as: $brush }),
+        vg.xDomain(vg.Fixed),
+        vg.yScale($scaleType),
+        vg.yGrid(true),
+        vg.width(440),
+        vg.height(240),
+        vg.marginLeft(65)
+      )
+    )
   ),
+  vg.hspace(10),
   vg.plot(
-    vg.rectY(vg.from(table, { filterBy: $brush }), {
-      x: vg.bin("time"),
-      y: vg.count(),
-      fill: "steelblue",
-      inset: 0.5,
+    vg.raster(vg.from(table, { filterBy: $brush }), {
+      x: "bp_rp",
+      y: "phot_g_mean_mag",
+      fill: "density",
+      bandwidth: $bandwidth,
+      pixelSize: $pixelSize,
     }),
-    vg.intervalX({ as: $brush }),
-    vg.xDomain(vg.Fixed),
-    vg.yTickFormat("s"),
-    vg.width(600),
-    vg.height(200)
-  ),
-  vg.plot(
-    vg.rectY(vg.from(table, { filterBy: $brush }), {
-      x: vg.bin("distance"),
-      y: vg.count(),
-      fill: "steelblue",
-      inset: 0.5,
-    }),
-    vg.intervalX({ as: $brush }),
-    vg.xDomain(vg.Fixed),
-    vg.yTickFormat("s"),
-    vg.width(600),
-    vg.height(200)
+    vg.intervalXY({ pixelSize: 2, as: $brush }),
+    vg.xyDomain(vg.Fixed),
+    vg.colorScale($scaleType),
+    vg.colorScheme("viridis"),
+    vg.yReverse(true),
+    vg.width(460),
+    vg.height(740),
+    vg.marginLeft(25),
+    vg.marginTop(20),
+    vg.marginRight(1)
   )
 );
 
-app.replaceChildren(chart);
+app.appendChild(chart);
